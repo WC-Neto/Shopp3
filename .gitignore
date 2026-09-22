@@ -1,0 +1,15 @@
+# Ambiente virtual
+venv/
+.venv/
+env/
+
+# Banco de dados local SQLite (não subir dados de teste)
+*.db
+shopp3.db
+
+# Arquivos do Python/Cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.vscode/
+.idea/
