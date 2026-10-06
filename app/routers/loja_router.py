@@ -30,3 +30,32 @@ def cadastrar_loja(loja: LojaCreate, db: Session = Depends(get_db)):
     db.refresh(db_loja) # Pega o ID gerado automaticamente
     
     return db_loja
+
+@router.put("/{loja_id}", response_model=LojaResponse)
+def atualizar_loja(loja_id: int, loja_dados: LojaCreate, db: Session = Depends(get_db)):
+    """Atualiza os dados de uma loja parceira no Shopp3."""
+    db_loja = db.query(LojaModel).filter(LojaModel.id == loja_id).first()
+    
+    if not db_loja:
+        raise HTTPException(status_code=404, detail="Loja não encontrada")
+    
+    for chave, valor in loja_dados.model_dump().items():
+        setattr(db_loja, chave, valor)
+    
+    db.commit()
+    db.refresh(db_loja)
+    
+    return db_loja
+
+@router.delete("/{loja_id}")
+def deletar_loja(loja_id: int, db: Session = Depends(get_db)):
+    db_loja = db.query(LojaModel).filter(LojaModel.id == loja_id).first()
+    
+    if not db_loja:
+        raise HTTPException(status_code=404, detail="Loja não encontrada")
+    
+    db.delete(db_loja)
+    
+    db.commit()
+    
+    return {"mensagem": "Loja removida com sucesso!"}
