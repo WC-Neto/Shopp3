@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean
+"""from sqlalchemy import Column, Integer, String, Float, Boolean
 from app.database import Base
 
 class ProdutoModel(Base):
@@ -10,4 +10,4 @@ class ProdutoModel(Base):
     preco = Column(Float, nullable=False)
     categoria = Column(String, index=True, nullable=False)
     em_estoque = Column(Boolean, default=True)
-    loja_id = Column(Integer, default=1)  # Por enquanto fixado em 1
+    loja_id = Column(Integer, default=1)"""  
