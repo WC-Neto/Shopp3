@@ -1,5 +1,5 @@
-"""from sqlalchemy import Column, Integer, String
-from app.database import Base
+from sqlalchemy import Column, Integer, String
+from database import Base
 
 class LojaModel(Base):
     __tablename__ = "lojas"
@@ -9,4 +9,4 @@ class LojaModel(Base):
     nome_fantasia = Column(String, index=True, nullable=False)
     endereco = Column(String, nullable=False)
     whatsapp = Column(String, nullable=False) 
-    categoria = Column(String, nullable=True) """
+    categoria = Column(String, nullable=True) 
