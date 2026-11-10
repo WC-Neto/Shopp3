@@ -1,10 +1,15 @@
 from fastapi import FastAPI
-from routers import produto_router
-from database import engine, Base
-from models import produto as produto_model
-from models import produto as produto_model
-from models import loja as loja_model
-from routers import produto_router, loja_router
+from app.database import engine, Base 
+from app.models import product, store, user
+
+# Importando os roteadores da pasta app/routers/
+from app.routers import (
+    product_router,
+    store_router,
+    user_create_router,
+    user_login_router
+)
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
@@ -13,10 +18,12 @@ app = FastAPI(
     version="1.0.0"
 )
 
-app.include_router(produto_router.router)
-app.include_router(loja_router.router)
+
+app.include_router(product_router.router)
+app.include_router(store_router.router)
+app.include_router(user_create_router.router)
+app.include_router(user_login_router.router)
 
 @app.get("/")
 def home():
     return {"mensagem": "API Shopp3 rodando com sucesso!"}
-

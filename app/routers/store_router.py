@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from schemas.loja import LojaCreate, LojaResponse
-from models.loja import LojaModel
-from database import get_db
+from app.schemas.store import LojaCreate, LojaResponse
+from app.models.store import LojaModel
+from app.database import get_db
+from app.core.security import obter_usuario_atual
 
 router = APIRouter(
     prefix="/lojas",
@@ -18,18 +19,25 @@ def listar_lojas(db: Session = Depends(get_db)):
     return lojas
 
 @router.post("/", response_model=LojaResponse, status_code=status.HTTP_201_CREATED)
-def cadastrar_loja(loja: LojaCreate, db: Session = Depends(get_db)):
+def cadastrar_loja(
+    loja: LojaCreate, 
+    db: Session = Depends(get_db),
+    usuario_logado: str = Depends(obter_usuario_atual) 
+):
     """Cadastra uma nova loja parceira no Shopp3."""
     db_loja = LojaModel(**loja.model_dump())
-    
     db.add(db_loja)
     db.commit()
     db.refresh(db_loja) 
-    
     return db_loja
 
 @router.put("/{loja_id}", response_model=LojaResponse)
-def atualizar_loja(loja_id: int, loja_dados: LojaCreate, db: Session = Depends(get_db)):
+def atualizar_loja(
+    loja_id: int, 
+    loja_dados: LojaCreate, 
+    db: Session = Depends(get_db),
+    usuario_logado: str = Depends(obter_usuario_atual) 
+):
     """Atualiza os dados de uma loja parceira no Shopp3."""
     db_loja = db.query(LojaModel).filter(LojaModel.id == loja_id).first()
     
@@ -41,19 +49,19 @@ def atualizar_loja(loja_id: int, loja_dados: LojaCreate, db: Session = Depends(g
     
     db.commit()
     db.refresh(db_loja)
-    
     return db_loja
 
 @router.delete("/{loja_id}")
-def deletar_loja(loja_id: int, db: Session = Depends(get_db)):
+def deletar_loja(
+    loja_id: int, 
+    db: Session = Depends(get_db),
+    usuario_logado: str = Depends(obter_usuario_atual) 
+):
     db_loja = db.query(LojaModel).filter(LojaModel.id == loja_id).first()
     
     if not db_loja:
         raise HTTPException(status_code=404, detail="Loja não encontrada")
     
     db.delete(db_loja)
-    
     db.commit()
-    
     return {"mensagem": "Loja removida com sucesso!"}
-

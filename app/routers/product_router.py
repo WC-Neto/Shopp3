@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from schemas.produto import ProdutoCreate, ProdutoResponse
-from models.produto import ProdutoModel
-from database import get_db
+from app.schemas.product import ProdutoCreate, ProdutoResponse
+from app.models.product import ProdutoModel
+from app.database import get_db
+from app.core.security import obter_usuario_atual
 
 router = APIRouter(
     prefix="/produtos",
@@ -24,18 +25,25 @@ def buscar_produtos(q: str, db: Session = Depends(get_db)):
     return produtos
 
 @router.post("/", response_model=ProdutoResponse, status_code=status.HTTP_201_CREATED)
-def cadastrar_produto(produto: ProdutoCreate, db: Session = Depends(get_db)):
+def cadastrar_produto(
+    produto: ProdutoCreate, 
+    db: Session = Depends(get_db),
+    usuario_logado: str = Depends(obter_usuario_atual) # 👈 AQUI nos parênteses!
+):
     """Salva um novo produto no Banco de Dados."""
     db_produto = ProdutoModel(**produto.model_dump())
-    
     db.add(db_produto)
     db.commit()
-    db.refresh(db_produto)  # Atualiza a instância com o ID gerado pelo banco
-    
+    db.refresh(db_produto)
     return db_produto
 
 @router.put("/{produto_id}", response_model=ProdutoResponse)
-def atualizar_produto(produto_id: int, produto_dados: ProdutoCreate, db: Session = Depends(get_db)):
+def atualizar_produto(
+    produto_id: int, 
+    produto_dados: ProdutoCreate, 
+    db: Session = Depends(get_db),
+    usuario_logado: str = Depends(obter_usuario_atual) # 👈 AQUI nos parênteses!
+):
     """Atualiza os dados de um produto existente no Banco de Dados."""
     db_produto = db.query(ProdutoModel).filter(ProdutoModel.id == produto_id).first()
     
@@ -47,11 +55,14 @@ def atualizar_produto(produto_id: int, produto_dados: ProdutoCreate, db: Session
     
     db.commit()
     db.refresh(db_produto)
-    
     return db_produto
 
 @router.delete("/{produto_id}")
-def deletar_produto(produto_id: int, db: Session = Depends(get_db)):
+def deletar_produto(
+    produto_id: int, 
+    db: Session = Depends(get_db),
+    usuario_logado: str = Depends(obter_usuario_atual) 
+):
     """Deleta um produto do Banco de Dados."""    
     db_produto = db.query(ProdutoModel).filter(ProdutoModel.id == produto_id).first()
     
@@ -60,7 +71,4 @@ def deletar_produto(produto_id: int, db: Session = Depends(get_db)):
     
     db.delete(db_produto)
     db.commit()
-    
     return {"mensagem": "Produto removido com sucesso!"}
-
-
