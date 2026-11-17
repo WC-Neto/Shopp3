@@ -8,9 +8,19 @@ from app.core.security import verificar_senha, criar_token_acesso
 
 router = APIRouter(tags=["Autenticação"])
 
-@router.post("/login", response_model=Token)
+@router.post(
+    "/login",
+    response_model=Token,
+    summary="Realizar login e obter token JWT",
+    response_description="Token de acesso Bearer gerado"
+)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    # Procura usuário pelo email (OAuth2 envia no campo 'username')
+    """
+    Autentica o usuário via OAuth2 Password Flow (informe o **e-mail** no campo `username` e a **senha**).
+    
+    - **Sucesso (200):** Retorna `access_token` e `token_type`.
+    - **Erro (401):** Credenciais inválidas.
+    """
     usuario = db.query(UsuarioModel).filter(UsuarioModel.email == form_data.username).first()
     
     if not usuario or not verificar_senha(form_data.password, usuario.senha_hash):
@@ -20,6 +30,5 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # Gerar token JWT
     access_token = criar_token_acesso(dados={"sub": usuario.email})
     return {"access_token": access_token, "token_type": "bearer"}

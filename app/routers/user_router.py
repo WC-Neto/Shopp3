@@ -9,7 +9,6 @@ router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 
 @router.post("/", response_model=UsuarioResponse, status_code=status.HTTP_201_CREATED)
 def criar_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
-    # 1. Verificar se o e-mail já existe
     usuario_existente = db.query(UsuarioModel).filter(UsuarioModel.email == usuario.email).first()
     if usuario_existente:
         raise HTTPException(
@@ -17,10 +16,9 @@ def criar_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
             detail="Este e-mail já está cadastrado."
         )
     
-    # 2. Gerar a hash da senha
+    
     senha_criptografada = gerar_hash_senha(usuario.senha)
     
-    # 3. Criar e salvar o novo usuário
     novo_usuario = UsuarioModel(
         email=usuario.email,
         senha_hash=senha_criptografada
